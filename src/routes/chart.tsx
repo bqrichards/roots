@@ -10,7 +10,7 @@ interface ChartProps {
 }
 
 export default function Chart({ family }: ChartProps) {
-	const { people = [], addresses = [] } = family || {}
+	const { people = [], addresses = [], pets = [] } = family || {}
 	const [selectedPerson, setSelectedPerson] = useState<PersonNode | null>()
 
 	const onPersonClicked = useCallback((person: PersonNode) => {
@@ -29,7 +29,7 @@ export default function Chart({ family }: ChartProps) {
 	return (
 		<>
 			<PageHeader title="Chart" />
-			<PersonInfoDrawer person={selectedPerson} allAddresses={addresses} onClose={onPersonClosed} />
+			<PersonInfoDrawer person={selectedPerson} allAddresses={addresses} allPets={pets} onClose={onPersonClosed} />
 			<div id="myDiagramDiv">
 				<canvas id="canvas" tabIndex={0} width="2108" height="1196">
 					This text is displayed if your browser does not support the Canvas HTML element.

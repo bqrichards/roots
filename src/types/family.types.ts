@@ -11,11 +11,8 @@ export interface Pet {
 	/** Animal breed (e.g. German Shepard) */
 	breed?: string
 
-	/** ISO 8601  */
-	birthDateTime?: string
-
-	/** ISO 8601  */
-	deathDateTime?: string
+	/** Animal's sex (e.g. M/F) */
+	sex?: string
 }
 
 export interface Address {

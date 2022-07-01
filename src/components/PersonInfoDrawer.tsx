@@ -1,11 +1,12 @@
 import { Descriptions, Divider, Drawer, List, Typography } from 'antd'
 import moment, { Moment } from 'moment'
 import { FC, useMemo } from 'react'
-import type { Address, PersonNode } from '../types/family.types'
+import type { Address, PersonNode, Pet } from '../types/family.types'
 
 interface PersonInfoDrawerProps {
 	person: PersonNode | null
 	allAddresses: Address[]
+	allPets: Pet[]
 	onClose: () => void
 }
 
@@ -14,7 +15,7 @@ interface ListItem {
 	subtitle: string
 }
 
-export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddresses, onClose }) => {
+export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddresses, allPets, onClose }) => {
 	const fullName = useMemo(() => {
 		if (person?.middleName) {
 			const nameParts = person.n.split(' ')
@@ -67,6 +68,19 @@ export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddress
 		[person, allAddresses]
 	)
 
+	const formattedPets = useMemo<ListItem[]>(
+		() =>
+			allPets
+				.filter(pet => (person?.pets || []).indexOf(pet.key) > -1)
+				.map(pet => {
+					const title = pet.name
+					const subtitle = [pet.animal, pet.breed, pet.sex].filter(val => typeof val === 'string').join(', ')
+
+					return { title, subtitle }
+				}),
+		[person, allPets]
+	)
+
 	return (
 		<Drawer visible={!!person} title={fullName} onClose={onClose} closable destroyOnClose>
 			<Typography.Paragraph>Age: {age}</Typography.Paragraph>
@@ -92,26 +106,48 @@ export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddress
 					</Descriptions>
 				</>
 			)}
-			<Divider />
-			<Typography.Title level={5}>Addresses</Typography.Title>
-			<List
-				dataSource={formattedAddresses}
-				renderItem={address => (
-					<List.Item>
-						<List.Item.Meta title={address.title} description={address.subtitle} />
-					</List.Item>
-				)}
-			/>
-			<Divider />
-			<Typography.Title level={5}>Jobs</Typography.Title>
-			<List
-				dataSource={person?.jobs || []}
-				renderItem={job => (
-					<List.Item>
-						<List.Item.Meta title={job.company} description={`${job.startYear} - ${job.endYear}`} />
-					</List.Item>
-				)}
-			/>
+			{person?.pets && (
+				<>
+					<Divider />
+					<Typography.Title level={5}>Pets</Typography.Title>
+					<List
+						dataSource={formattedPets}
+						renderItem={pet => (
+							<List.Item>
+								<List.Item.Meta title={pet.title} description={pet.subtitle} />
+							</List.Item>
+						)}
+					/>
+				</>
+			)}
+			{person?.addresses && (
+				<>
+					<Divider />
+					<Typography.Title level={5}>Addresses</Typography.Title>
+					<List
+						dataSource={formattedAddresses}
+						renderItem={address => (
+							<List.Item>
+								<List.Item.Meta title={address.title} description={address.subtitle} />
+							</List.Item>
+						)}
+					/>
+				</>
+			)}
+			{person?.jobs && (
+				<>
+					<Divider />
+					<Typography.Title level={5}>Jobs</Typography.Title>
+					<List
+						dataSource={person?.jobs || []}
+						renderItem={job => (
+							<List.Item>
+								<List.Item.Meta title={job.company} description={`${job.startYear} - ${job.endYear}`} />
+							</List.Item>
+						)}
+					/>
+				</>
+			)}
 		</Drawer>
 	)
 }
