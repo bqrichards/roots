@@ -8,7 +8,7 @@ const pinkgrad = '#F48FB1'
 
 function onNodePress(_e: go.InputEvent, nodeObj: go.GraphObject) {
 	const person = nodeObj.part.data as PersonNode
-	console.log(person.n)
+	alert('Clicked ' + person.n)
 }
 
 // get tooltip text from the object's data
