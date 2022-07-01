@@ -54,6 +54,8 @@ export interface PersonNode {
 	/** name */
 	n: string
 
+	middleName?: string
+
 	/** sex */
 	s: string
 
