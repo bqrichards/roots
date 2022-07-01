@@ -1,0 +1,29 @@
+.container {
+	display: flex;
+	flex-direction: row;
+	height: 100%;
+}
+
+.sider {
+	display: flex;
+	flex-direction: column;
+	background-color: white;
+}
+
+.siderMenuContainer {
+	display: flex;
+	flex-direction: column;
+	background-color: white;
+	flex: 1;
+	height: 100%;
+}
+
+.siderMenu {
+	height: 100%;
+}
+
+.mainContent {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}

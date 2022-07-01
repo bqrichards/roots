@@ -1,0 +1,32 @@
+#myDiagramDiv {
+	background-color: rgb(248, 248, 248);
+	border: 1px solid black;
+	width: 100%;
+	height: 600px;
+	position: relative;
+	-webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+}
+
+#canvas {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 2;
+	user-select: none;
+	touch-action: none;
+	width: 1054px;
+	height: 598px;
+}
+
+#idk1 {
+	position: absolute;
+	overflow: auto;
+	width: 1054px;
+	height: 598px;
+}
+
+#idk2 {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+}
