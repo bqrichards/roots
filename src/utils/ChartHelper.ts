@@ -6,10 +6,15 @@ import type { PersonNode } from '../types/family.types'
 const bluegrad = '#90CAF9'
 const pinkgrad = '#F48FB1'
 
+function onNodePress(_e: go.InputEvent, nodeObj: go.GraphObject) {
+	const person = nodeObj.part.data as PersonNode
+	console.log(person.n)
+}
+
 // get tooltip text from the object's data
 function tooltipTextConverter(person: PersonNode) {
 	let str = ''
-	str += 'Born: ' + person.birth?.date || '???'
+	str += 'Born: ' + person.birth?.datetime || '???'
 	// if (person.deathYear !== undefined) str += '\nDied: ' + person.deathYear
 	// if (person.reign !== undefined) str += '\nReign: ' + person.reign
 	return str
@@ -71,6 +76,7 @@ export function init(people: PersonNode[]) {
 			{
 				locationSpot: go.Spot.Center,
 				toolTip: tooltiptemplate,
+				click: onNodePress,
 			},
 			$(
 				go.Shape,
@@ -105,6 +111,7 @@ export function init(people: PersonNode[]) {
 			{
 				locationSpot: go.Spot.Center,
 				toolTip: tooltiptemplate,
+				click: onNodePress,
 			},
 			$(
 				go.Shape,

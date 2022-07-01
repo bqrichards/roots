@@ -1,7 +1,50 @@
+export interface Pet {
+	/** Unique ID */
+	key: number
+
+	/** Animal name (e.g. Buster) */
+	name?: string
+
+	/** Animal type (e.g. Cat) */
+	animal?: string
+
+	/** Animal breed (e.g. German Shepard) */
+	breed?: string
+
+	/** UTC */
+	birthDateTime?: string
+
+	/** UTC */
+	deathDateTime?: string
+}
+
+export interface Address {
+	key: number
+	line1?: string
+	line2?: string
+	city?: string
+
+	/** State Abbreviation (e.g. IA) */
+	state?: string
+
+	country?: string
+}
+
 export interface Job {
-	place: string
-	startYear: string
-	endYear: string
+	/** Address of job */
+	place?: Address
+
+	/** Company name */
+	company?: string
+
+	/** Position name */
+	position?: string
+
+	/** Start year */
+	startYear?: string
+
+	/** End year */
+	endYear?: string
 }
 
 export interface PersonNode {
@@ -15,10 +58,8 @@ export interface PersonNode {
 	s: string
 
 	birth?: {
-		/** MM/DD/YYYY */
-		date?: string
-		/** HH:mm */
-		time?: string
+		/** UTC */
+		datetime?: string
 		place?: string
 		weight?: string
 		address?: string
@@ -26,12 +67,18 @@ export interface PersonNode {
 	}
 
 	death?: {
-		date?: string
-		time?: string
+		/** UTC */
+		datetime?: string
 		place?: string
 	}
 
 	jobs?: Job[]
+
+	/** Keys of `Address` */
+	addresses?: number[]
+
+	/** Keys of `Pet` */
+	pets?: number[]
 
 	/** mother */
 	m?: number
@@ -44,11 +91,6 @@ export interface PersonNode {
 
 	/** husband */
 	husband?: number
-
-	origin?: string
-
-	/** attributes/markers */
-	a?: string[]
 }
 
 export interface Family {
