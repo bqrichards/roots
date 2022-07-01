@@ -1,24 +1,19 @@
 import go from 'gojs'
-import type { PersonNode } from '../types/family.types'
+import type { OnPersonClickedFunction, PersonNode } from '../types/family.types'
 
 // https://gojs.net/latest/samples/genogram.html
 
 const bluegrad = '#90CAF9'
 const pinkgrad = '#F48FB1'
 
-function onNodePress(_e: go.InputEvent, nodeObj: go.GraphObject) {
-	const person = nodeObj.part.data as PersonNode
-	alert('Clicked ' + person.n)
-}
-
 // get tooltip text from the object's data
-function tooltipTextConverter(person: PersonNode) {
-	let str = ''
-	str += 'Born: ' + person.birth?.datetime || '???'
-	// if (person.deathYear !== undefined) str += '\nDied: ' + person.deathYear
-	// if (person.reign !== undefined) str += '\nReign: ' + person.reign
-	return str
-}
+// function tooltipTextConverter(person: PersonNode) {
+// 	let str = ''
+// 	str += 'Born: ' + person.birth?.datetime || '???'
+// 	// if (person.deathYear !== undefined) str += '\nDied: ' + person.deathYear
+// 	// if (person.reign !== undefined) str += '\nReign: ' + person.reign
+// 	return str
+// }
 
 // define Converters to be used for Bindings
 function genderBrushConverter(gender: PersonNode['s']) {
@@ -27,10 +22,15 @@ function genderBrushConverter(gender: PersonNode['s']) {
 	return 'orange'
 }
 
-export function init(people: PersonNode[]) {
+export function init(people: PersonNode[], onPersonClicked: OnPersonClickedFunction) {
 	// Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
 	// For details, see https://gojs.net/latest/intro/buildingObjects.html
 	const $ = go.GraphObject.make
+
+	function onNodePress(_e: go.InputEvent, nodeObj: go.GraphObject) {
+		const person = nodeObj.part.data as PersonNode
+		onPersonClicked(person)
+	}
 
 	const myDiagram = $(go.Diagram, 'myDiagramDiv', {
 		initialAutoScale: go.Diagram.Uniform,
@@ -40,7 +40,7 @@ export function init(people: PersonNode[]) {
 			go.Adornment,
 			'Auto',
 			{ layerName: 'Grid' }, // the predefined layer that is behind everything else
-			$(go.Shape, 'Circle', { fill: '#c1cee3', stroke: null }),
+			// $(go.Shape, 'Circle', { fill: '#c1cee3', stroke: null }),
 			$(go.Placeholder, { margin: 2 })
 		),
 		// use a custom layout, defined below
@@ -52,19 +52,19 @@ export function init(people: PersonNode[]) {
 	})
 
 	// define tooltips for nodes
-	const tooltiptemplate = $(
-		'ToolTip',
-		{ 'Border.fill': 'whitesmoke', 'Border.stroke': 'black' },
-		$(
-			go.TextBlock,
-			{
-				font: 'bold 8pt Helvetica, bold Arial, sans-serif',
-				wrap: go.TextBlock.WrapFit,
-				margin: 5,
-			},
-			new go.Binding('text', '', tooltipTextConverter)
-		)
-	)
+	// const tooltiptemplate = $(
+	// 	'ToolTip',
+	// 	{ 'Border.fill': 'whitesmoke', 'Border.stroke': 'black' },
+	// 	$(
+	// 		go.TextBlock,
+	// 		{
+	// 			font: 'bold 8pt Helvetica, bold Arial, sans-serif',
+	// 			wrap: go.TextBlock.WrapFit,
+	// 			margin: 5,
+	// 		},
+	// 		new go.Binding('text', '', tooltipTextConverter)
+	// 	)
+	// )
 
 	// two different node templates, one for each sex,
 	// named by the category value in the node data object
@@ -75,7 +75,7 @@ export function init(people: PersonNode[]) {
 			'Auto',
 			{
 				locationSpot: go.Spot.Center,
-				toolTip: tooltiptemplate,
+				// toolTip: tooltiptemplate,
 				click: onNodePress,
 			},
 			$(
@@ -110,7 +110,7 @@ export function init(people: PersonNode[]) {
 			'Auto',
 			{
 				locationSpot: go.Spot.Center,
-				toolTip: tooltiptemplate,
+				// toolTip: tooltiptemplate,
 				click: onNodePress,
 			},
 			$(

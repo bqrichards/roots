@@ -11,10 +11,10 @@ export interface Pet {
 	/** Animal breed (e.g. German Shepard) */
 	breed?: string
 
-	/** UTC */
+	/** ISO 8601  */
 	birthDateTime?: string
 
-	/** UTC */
+	/** ISO 8601  */
 	deathDateTime?: string
 }
 
@@ -23,6 +23,7 @@ export interface Address {
 	line1?: string
 	line2?: string
 	city?: string
+	zip?: string
 
 	/** State Abbreviation (e.g. IA) */
 	state?: string
@@ -60,7 +61,7 @@ export interface PersonNode {
 	s: string
 
 	birth?: {
-		/** UTC */
+		/** ISO 8601 UTC */
 		datetime?: string
 		place?: string
 		weight?: string
@@ -69,7 +70,7 @@ export interface PersonNode {
 	}
 
 	death?: {
-		/** UTC */
+		/** ISO 8601  */
 		datetime?: string
 		place?: string
 	}
@@ -98,4 +99,8 @@ export interface PersonNode {
 export interface Family {
 	name: string
 	people: PersonNode[]
+	pets?: Pet[]
+	addresses?: Address[]
 }
+
+export type OnPersonClickedFunction = (person: PersonNode) => void
