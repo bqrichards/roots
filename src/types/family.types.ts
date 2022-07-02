@@ -80,11 +80,11 @@ export interface PersonNode {
 	/** Keys of `Pet` */
 	pets?: number[]
 
-	/** mother */
-	m?: number
+	/** mom */
+	mom?: number
 
-	/** father */
-	f?: number
+	/** dad */
+	dad?: number
 
 	/** partner */
 	partner?: number | number[]

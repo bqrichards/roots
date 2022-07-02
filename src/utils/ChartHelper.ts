@@ -199,8 +199,8 @@ function setupParents(diagram: go.Diagram) {
 	const nodeDataArray = model.nodeDataArray as PersonNode[]
 	for (const data of nodeDataArray) {
 		const key = data.key
-		const mother = data.m
-		const father = data.f
+		const mother = data.mom
+		const father = data.dad
 		if (mother === undefined || father === undefined) continue
 
 		const link = findMarriage(diagram, mother, father)
