@@ -1,18 +1,15 @@
-import { Descriptions, Divider, Drawer, List, Typography } from 'antd'
-import moment, { Moment } from 'moment'
 import { FC, useMemo } from 'react'
+import { Descriptions, Divider, Drawer, Typography } from 'antd'
+import moment, { Moment } from 'moment'
 import type { Address, PersonNode, Pet } from '../types/family.types'
+import { ListItemList } from './ListItemList'
+import type { ListItem } from './ListItemList'
 
 interface PersonInfoDrawerProps {
 	person: PersonNode | null
 	allAddresses: Address[]
 	allPets: Pet[]
 	onClose: () => void
-}
-
-interface ListItem {
-	title: string
-	subtitle: string
 }
 
 export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddresses, allPets, onClose }) => {
@@ -81,6 +78,15 @@ export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddress
 		[person, allPets]
 	)
 
+	const formattedJobs = useMemo<ListItem[]>(
+		() =>
+			(person?.jobs || []).map(job => ({
+				title: job.company,
+				subtitle: `${job.startYear || ''} - ${job.endYear || ''}`,
+			})),
+		[person]
+	)
+
 	return (
 		<Drawer visible={!!person} title={fullName} onClose={onClose} closable destroyOnClose>
 			<Typography.Paragraph>Age: {age}</Typography.Paragraph>
@@ -89,10 +95,10 @@ export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddress
 					<Typography.Title level={5}>Birth</Typography.Title>
 					<Descriptions column={1}>
 						<Descriptions.Item label="Date">{birthDate}</Descriptions.Item>
-						<Descriptions.Item label="Place">{person?.birth?.place || 'N/A'}</Descriptions.Item>
-						<Descriptions.Item label="Weight">{person?.birth?.weight || 'N/A'}</Descriptions.Item>
-						<Descriptions.Item label="Address">{person?.birth?.address || 'N/A'}</Descriptions.Item>
-						<Descriptions.Item label="Doctor">{person?.birth?.doctor || 'N/A'}</Descriptions.Item>
+						{person?.birth?.place && <Descriptions.Item label="Place">{person.birth.place}</Descriptions.Item>}
+						{person?.birth?.weight && <Descriptions.Item label="Weight">{person.birth.weight}</Descriptions.Item>}
+						{person?.birth?.address && <Descriptions.Item label="Address">{person.birth.address}</Descriptions.Item>}
+						{person?.birth?.doctor && <Descriptions.Item label="Doctor">{person.birth.doctor}</Descriptions.Item>}
 					</Descriptions>
 				</>
 			)}
@@ -102,52 +108,13 @@ export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddress
 					<Typography.Title level={5}>Death</Typography.Title>
 					<Descriptions column={1}>
 						<Descriptions.Item label="Date">{deathDate}</Descriptions.Item>
-						<Descriptions.Item label="Place">{person?.death?.place || 'N/A'}</Descriptions.Item>
+						{person?.death?.place && <Descriptions.Item label="Place">{person.death.place}</Descriptions.Item>}
 					</Descriptions>
 				</>
 			)}
-			{person?.pets && (
-				<>
-					<Divider />
-					<Typography.Title level={5}>Pets</Typography.Title>
-					<List
-						dataSource={formattedPets}
-						renderItem={pet => (
-							<List.Item>
-								<List.Item.Meta title={pet.title} description={pet.subtitle} />
-							</List.Item>
-						)}
-					/>
-				</>
-			)}
-			{person?.addresses && (
-				<>
-					<Divider />
-					<Typography.Title level={5}>Addresses</Typography.Title>
-					<List
-						dataSource={formattedAddresses}
-						renderItem={address => (
-							<List.Item>
-								<List.Item.Meta title={address.title} description={address.subtitle} />
-							</List.Item>
-						)}
-					/>
-				</>
-			)}
-			{person?.jobs && (
-				<>
-					<Divider />
-					<Typography.Title level={5}>Jobs</Typography.Title>
-					<List
-						dataSource={person?.jobs || []}
-						renderItem={job => (
-							<List.Item>
-								<List.Item.Meta title={job.company} description={`${job.startYear} - ${job.endYear}`} />
-							</List.Item>
-						)}
-					/>
-				</>
-			)}
+			{person?.pets && <ListItemList title="Pets" dataSource={formattedPets} />}
+			{person?.addresses && <ListItemList title="Addresses" dataSource={formattedAddresses} />}
+			{person?.jobs && <ListItemList title="Jobs" dataSource={formattedJobs} />}
 		</Drawer>
 	)
 }
