@@ -86,11 +86,8 @@ export interface PersonNode {
 	/** father */
 	f?: number
 
-	/** wife */
-	wife?: number | number[]
-
-	/** husband */
-	husband?: number | number[]
+	/** partner */
+	partner?: number | number[]
 }
 
 export interface Family {

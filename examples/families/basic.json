@@ -3,7 +3,7 @@
 	"people": [
 		{ "key": 0, "n": "Son", "gender": "M", "m": 2, "f": 3 },
 		{ "key": 1, "n": "Daughter", "gender": "F", "m": 2, "f": 3 },
-		{ "key": 2, "n": "Mother", "gender": "F", "husband": 3 },
-		{ "key": 3, "n": "Father", "gender": "M", "wife": 2 }
+		{ "key": 2, "n": "Mother", "gender": "F", "partner": 3 },
+		{ "key": 3, "n": "Father", "gender": "M", "partner": 2 }
 	]
 }

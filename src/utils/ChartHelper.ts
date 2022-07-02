@@ -146,21 +146,21 @@ function findMarriage(diagram: go.Diagram, a: go.Key, b: go.Key) {
 	return null
 }
 
-function setupWives(data: PersonNode, diagram: go.Diagram) {
+function setupPartners(data: PersonNode, diagram: go.Diagram) {
 	const model = diagram.model as go.GraphLinksModel
 	const key = data.key
-	let wives: number | number[] | undefined = data.wife
-	if (wives === undefined) return
+	let partnersKeys: number | number[] | undefined = data.partner
+	if (partnersKeys === undefined) return
 
-	if (typeof wives === 'number') wives = [wives]
-	for (const wife of wives) {
-		const wdata = model.findNodeDataForKey(wife) as PersonNode
-		if (key === wife || !wdata) {
-			console.log('cannot create Marriage relationship with self or unknown person ' + wife)
+	if (typeof partnersKeys === 'number') partnersKeys = [partnersKeys]
+	for (const partnerKey of partnersKeys) {
+		const hdata = model.findNodeDataForKey(partnerKey) as PersonNode
+		if (key === partnerKey || !hdata) {
+			console.log('cannot create Marriage relationship with self or unknown person ' + partnerKey)
 			continue
 		}
 
-		const link = findMarriage(diagram, key, wife)
+		const link = findMarriage(diagram, key, partnerKey)
 		if (link !== null) continue
 
 		// add a label node for the marriage link
@@ -170,39 +170,7 @@ function setupWives(data: PersonNode, diagram: go.Diagram) {
 		// add the marriage link itself, also referring to the label node
 		const mdata: go.ObjectData = {
 			from: key,
-			to: wife,
-			labelKeys: [mlab.key],
-			category: MARRIAGE_LINK_CATEGORY,
-		}
-		model.addLinkData(mdata)
-	}
-}
-
-function setupHusbands(data: PersonNode, diagram: go.Diagram) {
-	const model = diagram.model as go.GraphLinksModel
-	const key = data.key
-	let husbands: number | number[] | undefined = data.husband
-	if (husbands === undefined) return
-
-	if (typeof husbands === 'number') husbands = [husbands]
-	for (const husband of husbands) {
-		const hdata = model.findNodeDataForKey(husband) as PersonNode
-		if (key === husband || !hdata) {
-			console.log('cannot create Marriage relationship with self or unknown person ' + husband)
-			continue
-		}
-
-		const link = findMarriage(diagram, key, husband)
-		if (link !== null) continue
-
-		// add a label node for the marriage link
-		const mlab: go.ObjectData = { [PERSON_GENDER_KEY]: MARRIAGE_LINK_KEY, key: undefined }
-		model.addNodeData(mlab)
-
-		// add the marriage link itself, also referring to the label node
-		const mdata: go.ObjectData = {
-			from: key,
-			to: husband,
+			to: partnerKey,
 			labelKeys: [mlab.key],
 			category: MARRIAGE_LINK_CATEGORY,
 		}
@@ -218,8 +186,7 @@ function setupMarriages(diagram: go.Diagram) {
 	const model = diagram.model as go.GraphLinksModel
 	const nodeDataArray = model.nodeDataArray as PersonNode[]
 	for (const data of nodeDataArray) {
-		setupWives(data, diagram)
-		setupHusbands(data, diagram)
+		setupPartners(data, diagram)
 	}
 }
 
@@ -230,8 +197,7 @@ function setupMarriages(diagram: go.Diagram) {
 function setupParents(diagram: go.Diagram) {
 	const model = diagram.model as go.GraphLinksModel
 	const nodeDataArray = model.nodeDataArray as PersonNode[]
-	for (let i = 0; i < nodeDataArray.length; i++) {
-		const data = nodeDataArray[i]
+	for (const data of nodeDataArray) {
 		const key = data.key
 		const mother = data.m
 		const father = data.f
