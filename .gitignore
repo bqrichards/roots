@@ -1,6 +1,10 @@
 # Hidden family datasets
 examples/families/hidden/*
 
+# Build folder
+build/
+dist/
+
 # Created by https://www.toptal.com/developers/gitignore/api/node,react,macos,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,react,macos,visualstudiocode
 
