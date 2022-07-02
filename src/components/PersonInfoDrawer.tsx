@@ -18,11 +18,11 @@ interface ListItem {
 export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddresses, allPets, onClose }) => {
 	const fullName = useMemo(() => {
 		if (person?.middleName) {
-			const nameParts = person.n.split(' ')
+			const nameParts = person.name.split(' ')
 			nameParts.splice(1, 0, person.middleName)
 			return nameParts.join(' ')
 		} else {
-			return person?.n || '(unknown)'
+			return person?.name || '(unknown)'
 		}
 	}, [person])
 
