@@ -10,7 +10,7 @@ interface ChartProps {
 }
 
 export default function Chart({ family }: ChartProps) {
-	const { people = [], addresses = [], pets = [] } = family || {}
+	const { addresses = [], pets = [] } = family || {}
 	const [selectedPerson, setSelectedPerson] = useState<PersonNode | null>()
 
 	const onPersonClicked = useCallback((person: PersonNode) => {
@@ -82,7 +82,7 @@ export default function Chart({ family }: ChartProps) {
 			<PageHeader title="Chart" />
 			<PersonInfoDrawer person={selectedPerson} allAddresses={addresses} allPets={pets} onClose={onPersonClosed} />
 			<DiagramWrapper
-				people={people}
+				family={family}
 				skipsDiagramUpdate={false}
 				divId={divId}
 				onDiagramEvent={handleDiagramEvent}
