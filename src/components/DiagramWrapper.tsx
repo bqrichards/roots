@@ -228,8 +228,13 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 					continue
 				}
 
-				// const link = findMarriage(diagram, personKey, partnerKey)
-				// if (link !== null) continue
+				// Check if connection is already made in either direction
+				const linkExists = linkNodes.some(
+					linkNode =>
+						(linkNode.from === personKey && linkNode.to === partnerKey) ||
+						(linkNode.from === partnerKey && linkNode.to === personKey)
+				)
+				if (linkExists) continue
 
 				// add a label node for the marriage link
 				const labelData: MarriageLabelObject = { gender: MARRIAGE_LINK_KEY, key: linkCount.current }
