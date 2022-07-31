@@ -58,7 +58,13 @@ export interface PersonNode {
 	gender: string
 
 	birth?: {
-		/** ISO 8601 UTC */
+		/**
+		 * ISO 8601 UTC
+		 * @example
+		 * ```js
+		 * '2001-10-05T04:01-06:00'
+		 * ```
+		 * */
 		datetime?: string
 		place?: string
 		weight?: string
@@ -67,7 +73,13 @@ export interface PersonNode {
 	}
 
 	death?: {
-		/** ISO 8601  */
+		/**
+		 * ISO 8601 UTC
+		 * @example
+		 * ```js
+		 * '2001-10-05T04:01-06:00'
+		 * ```
+		 * */
 		datetime?: string
 		place?: string
 	}
