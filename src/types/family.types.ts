@@ -52,6 +52,7 @@ export interface PersonNode {
 	/** name */
 	name: string
 
+	/** middle name */
 	middleName?: string
 
 	/** gender */
@@ -84,6 +85,7 @@ export interface PersonNode {
 		place?: string
 	}
 
+	/** Array of jobs */
 	jobs?: Job[]
 
 	/** Keys of `Address` */
@@ -92,21 +94,24 @@ export interface PersonNode {
 	/** Keys of `Pet` */
 	pets?: number[]
 
-	/** mom */
-	mom?: number
-
-	/** dad */
-	dad?: number
-
-	/** partner */
-	partner?: number | number[]
-
 	/** Additional notes */
 	notes?: string
 }
 
+export interface Marriage {
+	/** Key of person in marriage */
+	one: number
+
+	/** Key of other person in marriage */
+	two: number
+
+	/** Children keys */
+	children: number[]
+}
+
 export interface Family {
 	name: string
+	marriages: Marriage[]
 	people: PersonNode[]
 	pets?: Pet[]
 	addresses?: Address[]

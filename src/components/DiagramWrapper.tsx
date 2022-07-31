@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as go from 'gojs'
 import { ReactDiagram } from 'gojs-react'
-import type { OnPersonClickedFunction, PersonNode } from '../types/family.types'
+import type { Family, OnPersonClickedFunction, PersonNode } from '../types/family.types'
 import { GenogramLayout } from '../chart/GenogramLayout'
 
 interface WrapperProps {
@@ -9,7 +9,7 @@ interface WrapperProps {
 	onDiagramEvent: (e: go.DiagramEvent) => void
 	onModelChange: (e: go.IncrementalData) => void
 	divId: string
-	people: PersonNode[]
+	family: Family
 	onPersonClicked: OnPersonClickedFunction
 }
 
@@ -44,6 +44,8 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 	 * Ref to keep a reference to the component, which provides access to the GoJS diagram via getDiagram().
 	 */
 	const diagramRef = React.useRef<ReactDiagram>(null)
+
+	const { people, marriages } = props.family
 
 	const linkCount = React.useRef(-1)
 
@@ -199,95 +201,51 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 		return myDiagram
 	}, [])
 
-	// process the node data to determine marriages
-	const { marriageLabelNodes, marriageLinkNodes } = React.useMemo(() => {
+	// process the node data to determine marriage and child relationships
+	const { marriageLabelNodes, linkDataArray } = React.useMemo(() => {
 		const labelNodes: MarriageLabelObject[] = []
-		const linkNodes: MarriageLink[] = []
-
-		for (const personNode of props.people) {
-			// setupPartners
-			const personKey = personNode.key
-			let partnersKeys: number | number[] | undefined = personNode.partner
-			if (partnersKeys === undefined) continue
-
-			if (typeof partnersKeys === 'number') partnersKeys = [partnersKeys]
-			for (const partnerKey of partnersKeys) {
-				const partner = props.people.find(person => person.key === partnerKey)
-				if (personKey === partnerKey || !partner) {
-					console.log('cannot create Marriage relationship with self or unknown person ' + partnerKey)
-					continue
-				}
-
-				// Check if connection is already made
-				const linkExists = linkNodes.some(linkNode => linkNode.from === partnerKey && linkNode.to === personKey)
-				if (linkExists) continue
-
-				// add a label node for the marriage link
-				const labelData: MarriageLabelObject = { gender: MARRIAGE_LINK_KEY, key: linkCount.current }
-				labelNodes.push(labelData)
-
-				linkCount.current--
-
-				// add the marriage link itself, also referring to the label node
-				const linkData: MarriageLink = {
-					from: personKey,
-					to: partnerKey,
-					labelKeys: [labelData.key],
-					category: MARRIAGE_LINK_CATEGORY,
-				}
-				linkNodes.push(linkData)
-			}
-		}
-
-		return { marriageLabelNodes: labelNodes, marriageLinkNodes: linkNodes }
-	}, [props.people])
-
-	const nodeDataArray = React.useMemo(
-		() => [...props.people, ...marriageLabelNodes],
-		[props.people, marriageLabelNodes]
-	)
-
-	// process parent-child relationships once all marriages are known
-	const parentChildLinkNodes = React.useMemo(() => {
 		const linkNodes: go.ObjectData[] = []
 
-		for (const data of props.people) {
-			const childNode = data.key
-			const mother = data.mom
-			const father = data.dad
-			if (mother === undefined || father === undefined) continue
-
-			// Find parents' marriage link for this child
-			const marriageLinkData = marriageLinkNodes.find(
-				marriageLinkNode =>
-					(marriageLinkNode.from === mother && marriageLinkNode.to === father) ||
-					(marriageLinkNode.from === father && marriageLinkNode.to === mother)
-			)
-
-			if (!marriageLinkData) {
-				// or warn no known mother or no known father or no known marriage between them
-				console.log('unknown marriage: ' + mother + ' & ' + father)
+		for (const { one, two, children } of marriages) {
+			// Check if person exist
+			if (one === two || !people.find(person => person.key === two)) {
+				console.log('cannot create Marriage relationship with self or unknown person ' + two)
 				continue
 			}
 
-			if (marriageLinkData.labelKeys === undefined || marriageLinkData.labelKeys[0] === undefined) continue
-			const marriageLabelKey = marriageLinkData.labelKeys[0]
-			const cdata: go.ObjectData = { from: marriageLabelKey, to: childNode }
-			linkNodes.push(cdata)
+			// add a label node for the marriage link
+			const labelData: MarriageLabelObject = { gender: MARRIAGE_LINK_KEY, key: linkCount.current }
+			labelNodes.push(labelData)
+
+			linkCount.current--
+
+			// add the marriage link itself, also referring to the label node
+			const linkData: MarriageLink = {
+				from: one,
+				to: two,
+				labelKeys: [labelData.key],
+				category: MARRIAGE_LINK_CATEGORY,
+			}
+			linkNodes.push(linkData)
+
+			// Process parent-child relationship once marriage is known
+			for (const child of children) {
+				if (linkData.labelKeys === undefined || linkData.labelKeys[0] === undefined) continue
+				const marriageLabelKey = linkData.labelKeys[0]
+				const cdata: go.ObjectData = { from: marriageLabelKey, to: child }
+				linkNodes.push(cdata)
+			}
 		}
 
-		return linkNodes
-	}, [props.people])
+		return { marriageLabelNodes: labelNodes, linkDataArray: linkNodes }
+	}, [people])
 
-	const linkDataArray = React.useMemo(
-		() => [...marriageLinkNodes, ...parentChildLinkNodes],
-		[marriageLinkNodes, parentChildLinkNodes]
-	)
+	const nodeDataArray = React.useMemo(() => [...people, ...marriageLabelNodes], [people, marriageLabelNodes])
 
 	return (
 		<ReactDiagram
 			ref={diagramRef}
-			style={{ backgroundColor: '#eee', width: '100%', height: '100%' }}
+			style={reactDiagramStyle}
 			divClassName={props.divId}
 			initDiagram={initDiagram}
 			nodeDataArray={nodeDataArray}
@@ -297,3 +255,5 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 		/>
 	)
 }
+
+const reactDiagramStyle: React.CSSProperties = { backgroundColor: '#eee', width: '100%', height: '100%' }
