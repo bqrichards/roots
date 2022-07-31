@@ -1,9 +1,9 @@
 {
 	"name": "Basic Family",
 	"people": [
-		{ "key": 0, "n": "Son", "s": "M", "m": 2, "f": 3 },
-		{ "key": 1, "n": "Daughter", "s": "F", "m": 2, "f": 3 },
-		{ "key": 2, "n": "Mother", "s": "F", "husband": 3 },
-		{ "key": 3, "n": "Father", "s": "M", "wife": 2 }
+		{ "key": 0, "name": "Son", "gender": "M", "mom": 2, "dad": 3 },
+		{ "key": 1, "name": "Daughter", "gender": "F", "mom": 2, "dad": 3 },
+		{ "key": 2, "name": "Mother", "gender": "F", "partner": 3 },
+		{ "key": 3, "name": "Father", "gender": "M", "partner": 2 }
 	]
 }

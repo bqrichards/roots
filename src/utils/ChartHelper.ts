@@ -6,21 +6,17 @@ import type { OnPersonClickedFunction, PersonNode } from '../types/family.types'
 const bluegrad = '#90CAF9'
 const pinkgrad = '#F48FB1'
 
-// get tooltip text from the object's data
-// function tooltipTextConverter(person: PersonNode) {
-// 	let str = ''
-// 	str += 'Born: ' + person.birth?.datetime || '???'
-// 	// if (person.deathYear !== undefined) str += '\nDied: ' + person.deathYear
-// 	// if (person.reign !== undefined) str += '\nReign: ' + person.reign
-// 	return str
-// }
+const MARRIAGE_LINK_CATEGORY = 'Marriage'
+const MARRIAGE_LINK_KEY = 'LinkLabel'
 
-// define Converters to be used for Bindings
-function genderBrushConverter(gender: PersonNode['s']) {
+function genderBrushConverter(gender: PersonNode['gender']) {
 	if (gender === 'M') return bluegrad
 	if (gender === 'F') return pinkgrad
 	return 'orange'
 }
+
+const PERSON_NAME_KEY: keyof PersonNode = 'name'
+const PERSON_GENDER_KEY: keyof PersonNode = 'gender'
 
 export function init(people: PersonNode[], onPersonClicked: OnPersonClickedFunction) {
 	// Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
@@ -35,14 +31,6 @@ export function init(people: PersonNode[], onPersonClicked: OnPersonClickedFunct
 	const myDiagram = $(go.Diagram, 'myDiagramDiv', {
 		initialAutoScale: go.Diagram.Uniform,
 		'undoManager.isEnabled': true,
-		// when a node is selected, draw a big yellow circle behind it
-		nodeSelectionAdornmentTemplate: $(
-			go.Adornment,
-			'Auto',
-			{ layerName: 'Grid' }, // the predefined layer that is behind everything else
-			// $(go.Shape, 'Circle', { fill: '#c1cee3', stroke: null }),
-			$(go.Placeholder, { margin: 2 })
-		),
 		// use a custom layout, defined below
 		layout: $(GenogramLayout, {
 			direction: 90,
@@ -51,96 +39,40 @@ export function init(people: PersonNode[], onPersonClicked: OnPersonClickedFunct
 		}),
 	})
 
-	// define tooltips for nodes
-	// const tooltiptemplate = $(
-	// 	'ToolTip',
-	// 	{ 'Border.fill': 'whitesmoke', 'Border.stroke': 'black' },
-	// 	$(
-	// 		go.TextBlock,
-	// 		{
-	// 			font: 'bold 8pt Helvetica, bold Arial, sans-serif',
-	// 			wrap: go.TextBlock.WrapFit,
-	// 			margin: 5,
-	// 		},
-	// 		new go.Binding('text', '', tooltipTextConverter)
-	// 	)
-	// )
-
-	// two different node templates, one for each sex,
-	// named by the category value in the node data object
-	myDiagram.nodeTemplateMap.add(
-		'M', // male
+	myDiagram.nodeTemplate = $(
+		go.Node,
+		'Auto',
+		{
+			locationSpot: go.Spot.Center,
+			click: onNodePress,
+		},
 		$(
-			go.Node,
-			'Auto',
+			go.Shape,
+			'Rectangle',
 			{
-				locationSpot: go.Spot.Center,
-				// toolTip: tooltiptemplate,
-				click: onNodePress,
+				fill: 'lightgray',
+				stroke: null,
+				strokeWidth: 0,
+				stretch: go.GraphObject.Fill,
+				alignment: go.Spot.Center,
 			},
-			$(
-				go.Shape,
-				'Rectangle',
-				{
-					fill: 'lightgray',
-					stroke: null,
-					strokeWidth: 0,
-					stretch: go.GraphObject.Fill,
-					alignment: go.Spot.Center,
-				},
-				new go.Binding('fill', 's', genderBrushConverter)
-			),
-			$(
-				go.TextBlock,
-				{
-					font: '700 12px Droid Serif, sans-serif',
-					textAlign: 'center',
-					margin: 10,
-					maxSize: new go.Size(80, NaN),
-				},
-				new go.Binding('text', 'n')
-			)
-		)
-	)
-
-	myDiagram.nodeTemplateMap.add(
-		'F', // female
+			new go.Binding('fill', PERSON_GENDER_KEY, genderBrushConverter)
+		),
 		$(
-			go.Node,
-			'Auto',
+			go.TextBlock,
 			{
-				locationSpot: go.Spot.Center,
-				// toolTip: tooltiptemplate,
-				click: onNodePress,
+				font: '700 12px Droid Serif, sans-serif',
+				textAlign: 'center',
+				margin: 10,
+				maxSize: new go.Size(80, NaN),
 			},
-			$(
-				go.Shape,
-				'Rectangle',
-				{
-					fill: 'lightgray',
-					stroke: null,
-					strokeWidth: 0,
-					stretch: go.GraphObject.Fill,
-					alignment: go.Spot.Center,
-				},
-				new go.Binding('fill', 's', genderBrushConverter)
-			),
-			$(
-				go.TextBlock,
-				{
-					font: '700 12px Droid Serif, sans-serif',
-					textAlign: 'center',
-					margin: 10,
-					maxSize: new go.Size(80, NaN),
-				},
-				new go.Binding('text', 'n')
-			)
+			new go.Binding('text', PERSON_NAME_KEY)
 		)
 	)
 
 	// the representation of each label node -- nothing shows on a Marriage Link
 	myDiagram.nodeTemplateMap.add(
-		'LinkLabel',
+		MARRIAGE_LINK_KEY,
 		$(go.Node, {
 			selectable: false,
 			width: 1,
@@ -158,7 +90,7 @@ export function init(people: PersonNode[], onPersonClicked: OnPersonClickedFunct
 
 	// for marriage relationships
 	myDiagram.linkTemplateMap.add(
-		'Marriage',
+		MARRIAGE_LINK_CATEGORY,
 		$(go.Link, { selectable: false, routing: go.Link.Orthogonal }, $(go.Shape, { strokeWidth: 2.5, stroke: '#6a0dad' }))
 	)
 
@@ -176,7 +108,7 @@ function setupDiagram(diagram: go.Diagram, people: PersonNode[], focusId?: numbe
 		// declare support for link label nodes
 		linkLabelKeysProperty: 'labelKeys',
 		// this property determines which template is used
-		nodeCategoryProperty: 's',
+		nodeCategoryProperty: PERSON_GENDER_KEY,
 		// if a node data object is copied, copy its data.a Array
 		copiesArrays: true,
 		// create all of the nodes for people
@@ -201,18 +133,49 @@ function setupDiagram(diagram: go.Diagram, people: PersonNode[], focusId?: numbe
 }
 
 function findMarriage(diagram: go.Diagram, a: go.Key, b: go.Key) {
-	// A and B are node keys
 	const nodeA = diagram.findNodeForKey(a)
 	const nodeB = diagram.findNodeForKey(b)
 	if (nodeA !== null && nodeB !== null) {
 		const it = nodeA.findLinksBetween(nodeB) // in either direction
 		while (it.next()) {
 			const link = it.value
-			// Link.data.category === "Marriage" means it's a marriage relationship
-			if (link.data !== null && link.data.category === 'Marriage') return link
+			// Check for marriage link
+			if (link.data !== null && link.data.category === MARRIAGE_LINK_CATEGORY) return link
 		}
 	}
 	return null
+}
+
+function setupPartners(data: PersonNode, diagram: go.Diagram) {
+	const model = diagram.model as go.GraphLinksModel
+	const key = data.key
+	let partnersKeys: number | number[] | undefined = data.partner
+	if (partnersKeys === undefined) return
+
+	if (typeof partnersKeys === 'number') partnersKeys = [partnersKeys]
+	for (const partnerKey of partnersKeys) {
+		const hdata = model.findNodeDataForKey(partnerKey) as PersonNode
+		if (key === partnerKey || !hdata) {
+			console.log('cannot create Marriage relationship with self or unknown person ' + partnerKey)
+			continue
+		}
+
+		const link = findMarriage(diagram, key, partnerKey)
+		if (link !== null) continue
+
+		// add a label node for the marriage link
+		const mlab: go.ObjectData = { [PERSON_GENDER_KEY]: MARRIAGE_LINK_KEY, key: undefined }
+		model.addNodeData(mlab)
+
+		// add the marriage link itself, also referring to the label node
+		const mdata: go.ObjectData = {
+			from: key,
+			to: partnerKey,
+			labelKeys: [mlab.key],
+			category: MARRIAGE_LINK_CATEGORY,
+		}
+		model.addLinkData(mdata)
+	}
 }
 
 /**
@@ -222,62 +185,8 @@ function findMarriage(diagram: go.Diagram, a: go.Key, b: go.Key) {
 function setupMarriages(diagram: go.Diagram) {
 	const model = diagram.model as go.GraphLinksModel
 	const nodeDataArray = model.nodeDataArray as PersonNode[]
-	for (let i = 0; i < nodeDataArray.length; i++) {
-		const data = nodeDataArray[i]
-		const key = data.key
-		let wives: number | number[] = data.wife
-		if (wives !== undefined) {
-			if (typeof wives === 'number') wives = [wives]
-			for (let j = 0; j < wives.length; j++) {
-				const wife = wives[j]
-				const wdata = model.findNodeDataForKey(wife) as PersonNode
-				if (key === wife || !wdata || wdata.s !== 'F') {
-					console.log('cannot create Marriage relationship with self or unknown person ' + wife)
-					continue
-				}
-				const link = findMarriage(diagram, key, wife)
-				if (link === null) {
-					// add a label node for the marriage link
-					const mlab = { s: 'LinkLabel', key: undefined }
-					model.addNodeData(mlab)
-					// add the marriage link itself, also referring to the label node
-					const mdata = {
-						from: key,
-						to: wife,
-						labelKeys: [mlab.key],
-						category: 'Marriage',
-					}
-					model.addLinkData(mdata)
-				}
-			}
-		}
-
-		let husbands: number | number[] = data.husband
-		if (husbands !== undefined) {
-			if (typeof husbands === 'number') husbands = [husbands]
-			for (let j = 0; j < husbands.length; j++) {
-				const husband = husbands[j]
-				const hdata = model.findNodeDataForKey(husband) as PersonNode
-				if (key === husband || !hdata || hdata.s !== 'M') {
-					console.log('cannot create Marriage relationship with self or unknown person ' + husband)
-					continue
-				}
-				const link = findMarriage(diagram, key, husband)
-				if (link === null) {
-					// add a label node for the marriage link
-					const mlab = { s: 'LinkLabel', key: undefined }
-					model.addNodeData(mlab)
-					// add the marriage link itself, also referring to the label node
-					const mdata = {
-						from: key,
-						to: husband,
-						labelKeys: [mlab.key],
-						category: 'Marriage',
-					}
-					model.addLinkData(mdata)
-				}
-			}
-		}
+	for (const data of nodeDataArray) {
+		setupPartners(data, diagram)
 	}
 }
 
@@ -288,24 +197,24 @@ function setupMarriages(diagram: go.Diagram) {
 function setupParents(diagram: go.Diagram) {
 	const model = diagram.model as go.GraphLinksModel
 	const nodeDataArray = model.nodeDataArray as PersonNode[]
-	for (let i = 0; i < nodeDataArray.length; i++) {
-		const data = nodeDataArray[i]
+	for (const data of nodeDataArray) {
 		const key = data.key
-		const mother = data.m
-		const father = data.f
-		if (mother !== undefined && father !== undefined) {
-			const link = findMarriage(diagram, mother, father)
-			if (link === null) {
-				// or warn no known mother or no known father or no known marriage between them
-				console.log('unknown marriage: ' + mother + ' & ' + father)
-				continue
-			}
-			const mdata = link.data
-			if (mdata.labelKeys === undefined || mdata.labelKeys[0] === undefined) continue
-			const mlabkey = mdata.labelKeys[0]
-			const cdata = { from: mlabkey, to: key }
-			model.addLinkData(cdata)
+		const mother = data.mom
+		const father = data.dad
+		if (mother === undefined || father === undefined) continue
+
+		const link = findMarriage(diagram, mother, father)
+		if (link === null) {
+			// or warn no known mother or no known father or no known marriage between them
+			console.log('unknown marriage: ' + mother + ' & ' + father)
+			continue
 		}
+
+		const mdata = link.data
+		if (mdata.labelKeys === undefined || mdata.labelKeys[0] === undefined) continue
+		const mlabkey = mdata.labelKeys[0]
+		const cdata: go.ObjectData = { from: mlabkey, to: key }
+		model.addLinkData(cdata)
 	}
 }
 
@@ -381,27 +290,27 @@ class GenogramLayout extends go.LayeredDigraphLayout {
 			if (!(link instanceof go.Link)) continue
 			if (!link.isLayoutPositioned || !link.isVisible()) continue
 			if (nonmemberonly && link.containingGroup !== null) continue
+
+			if (link.isLabeledLink) continue
 			// if it's a parent-child link, add a LayoutEdge for it
-			if (!link.isLabeledLink) {
-				const parent = net.findVertex(link.fromNode) // should be a label node
-				const child = net.findVertex(link.toNode)
-				if (child !== null) {
-					// an unmarried child
-					net.linkVertexes(parent, child, link)
-				} else {
-					// a married child
-					link.toNode.linksConnected.each(l => {
-						if (!l.isLabeledLink) return // if it has no label node, it's a parent-child link
-						// found the Marriage Link, now get its label Node
-						const mlab = l.labelNodes.first()
-						// parent-child link should connect with the label node,
-						// so the LayoutEdge should connect with the LayoutVertex representing the label node
-						const mlabvert = net.findVertex(mlab)
-						if (mlabvert !== null) {
-							net.linkVertexes(parent, mlabvert, link)
-						}
-					})
-				}
+			const parent = net.findVertex(link.fromNode) // should be a label node
+			const child = net.findVertex(link.toNode)
+			if (child !== null) {
+				// an unmarried child
+				net.linkVertexes(parent, child, link)
+			} else {
+				// a married child
+				link.toNode.linksConnected.each(l => {
+					if (!l.isLabeledLink) return // if it has no label node, it's a parent-child link
+					// found the Marriage Link, now get its label Node
+					const mlab = l.labelNodes.first()
+					// parent-child link should connect with the label node,
+					// so the LayoutEdge should connect with the LayoutVertex representing the label node
+					const mlabvert = net.findVertex(mlab)
+					if (mlabvert !== null) {
+						net.linkVertexes(parent, mlabvert, link)
+					}
+				})
 			}
 		}
 
@@ -450,6 +359,7 @@ class GenogramLayout extends go.LayeredDigraphLayout {
 	assignLayers() {
 		super.assignLayers()
 		const horiz = this.direction == 0.0 || this.direction == 180.0
+
 		// for every vertex, record the maximum vertex width or height for the vertex's layer
 		const maxsizes = []
 		this.network.vertexes.each((v: go.LayeredDigraphVertex) => {
@@ -473,12 +383,14 @@ class GenogramLayout extends go.LayeredDigraphLayout {
 				v.height = max
 			}
 		})
+
 		// from now on, the LayeredDigraphLayout will think that the Node is bigger than it really is
 		// (other than the ones that are the widest or tallest in their respective layer).
 	}
 
 	commitNodes() {
 		super.commitNodes()
+
 		// position regular nodes
 		this.network.vertexes.each(v => {
 			if (v.node !== null && !v.node.isLinkLabel) {
@@ -499,7 +411,7 @@ class GenogramLayout extends go.LayeredDigraphLayout {
 			let spouseA = lablink.fromNode
 			let spouseB = lablink.toNode
 			// prefer fathers on the left, mothers on the right
-			if ((spouseA.data as PersonNode).s === 'F') {
+			if ((spouseA.data as PersonNode).gender === 'F') {
 				// sex is female
 				const temp = spouseA
 				spouseA = spouseB

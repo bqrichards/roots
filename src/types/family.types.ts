@@ -50,12 +50,12 @@ export interface PersonNode {
 	key: number
 
 	/** name */
-	n: string
+	name: string
 
 	middleName?: string
 
-	/** sex */
-	s: string
+	/** gender */
+	gender: string
 
 	birth?: {
 		/** ISO 8601 UTC */
@@ -80,17 +80,17 @@ export interface PersonNode {
 	/** Keys of `Pet` */
 	pets?: number[]
 
-	/** mother */
-	m?: number
+	/** mom */
+	mom?: number
 
-	/** father */
-	f?: number
+	/** dad */
+	dad?: number
 
-	/** wife */
-	wife?: number
+	/** partner */
+	partner?: number | number[]
 
-	/** husband */
-	husband?: number
+	/** Additional notes */
+	notes?: string
 }
 
 export interface Family {

@@ -28,7 +28,7 @@ const menuKeyToLabel: Record<string, string> = MENU_ITEMS.reduce((map, obj) => {
 
 const App = () => {
 	const [familyTree, setFamilyTree] = useState<Family | null>(INITIAL_FAMILY)
-	const [collapsed, setCollapsed] = useState(false)
+	const [collapsed, setCollapsed] = useState(true)
 	const toggleCollapsed = useCallback(() => setCollapsed(prev => !prev), [])
 
 	const makeNewFamilyTree = useCallback(() => setFamilyTree(INITIAL_FAMILY), [])
