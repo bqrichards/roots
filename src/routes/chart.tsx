@@ -1,9 +1,9 @@
 import { PageHeader } from 'components/PageHeader'
-import { init } from '../utils/ChartHelper'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import '../styles/chart.scss'
 import type { Family, PersonNode } from '../types/family.types'
 import { PersonInfoDrawer } from '../components/PersonInfoDrawer'
+import { DiagramWrapper } from '../components/DiagramWrapper'
 
 interface ChartProps {
 	family: Family | null
@@ -21,20 +21,77 @@ export default function Chart({ family }: ChartProps) {
 		setSelectedPerson(null)
 	}, [])
 
-	useEffect(() => {
-		console.log('Init', people)
-		init(people, onPersonClicked)
-	}, [people])
+	/**
+	 * Handle any app-specific DiagramEvents, in this case just selection changes.
+	 * On ChangedSelection, find the corresponding data and set the selectedKey state.
+	 *
+	 * This is not required, and is only needed when handling DiagramEvents from the GoJS diagram.
+	 * @param e a GoJS DiagramEvent
+	 */
+	const handleDiagramEvent = useCallback((e: go.DiagramEvent) => {
+		const name = e.name
+		console.log(name)
+		// switch (name) {
+		// 	case 'ChangedSelection': {
+		// 		const sel = e.subject.first()
+		// 		if (sel) {
+		// 			this.setState({ selectedKey: sel.key })
+		// 		} else {
+		// 			this.setState({ selectedKey: null })
+		// 		}
+		// 		break
+		// 	}
+		// 	default:
+		// 		break
+		// }
+	}, [])
+
+	/**
+	 * Handle GoJS model changes, which output an object of data changes via Model.toIncrementalData.
+	 * This method should iterates over those changes and update state to keep in sync with the GoJS model.
+	 * This can be done via setState in React or another preferred state management method.
+	 * @param obj a JSON-formatted string
+	 */
+	const handleModelChange = useCallback((obj: go.IncrementalData) => {
+		// const insertedNodeKeys = obj.insertedNodeKeys
+		// const modifiedNodeData = obj.modifiedNodeData
+		// const removedNodeKeys = obj.removedNodeKeys
+		// const insertedLinkKeys = obj.insertedLinkKeys
+		// const modifiedLinkData = obj.modifiedLinkData
+		// const removedLinkKeys = obj.removedLinkKeys
+		// const modifiedModelData = obj.modelData
+
+		console.log('Model changed', obj)
+
+		// see gojs-react-basic for an example model change handler
+		// when setting state, be sure to set skipsDiagramUpdate: true since GoJS already has this update
+	}, [])
+
+	// /**
+	//  * Handle changes to the checkbox on whether to allow relinking.
+	//  * @param e a change event from the checkbox
+	//  */
+	// const handleRelinkChange = (e: go.DiagramEvent) => {
+	// 	const target = e.target
+	// 	const value = target.checked
+	// 	this.setState({ modelData: { canRelink: value }, skipsDiagramUpdate: false })
+	// }
 
 	return (
 		<>
 			<PageHeader title="Chart" />
 			<PersonInfoDrawer person={selectedPerson} allAddresses={addresses} allPets={pets} onClose={onPersonClosed} />
-			<div id="myDiagramDiv">
-				<canvas id="canvas" tabIndex={0} width="2108" height="1196">
-					This text is displayed if your browser does not support the Canvas HTML element.
-				</canvas>
-			</div>
+			<DiagramWrapper
+				people={people}
+				skipsDiagramUpdate={false}
+				divId={divId}
+				onDiagramEvent={handleDiagramEvent}
+				onModelChange={handleModelChange}
+				onPersonClicked={onPersonClicked}
+			/>
+			<div id={divId} style={{ height: 0, width: 0 }} />
 		</>
 	)
 }
+
+const divId = 'myDiagramDiv'
