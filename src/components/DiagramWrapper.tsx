@@ -47,8 +47,6 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 
 	const linkCount = React.useRef(-1)
 
-	// const linkDataArray = React.useState<go.ObjectData[]>([])
-
 	/**
 	 * Get the diagram reference and add any desired diagram listeners.
 	 * Typically the same function will be used for each listener,
@@ -81,9 +79,7 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 	 * and maybe doing other initialization tasks like customizing tools.
 	 * The model's data should not be set here, as the ReactDiagram component handles that via the other props.
 	 */
-	const initDiagram = (): go.Diagram => {
-		// Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
-		// For details, see https://gojs.net/latest/intro/buildingObjects.html
+	const initDiagram = React.useCallback((): go.Diagram => {
 		const $ = go.GraphObject.make
 
 		function onNodePress(_e: go.InputEvent, nodeObj: go.GraphObject) {
@@ -105,10 +101,6 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 				linkLabelKeysProperty: 'labelKeys',
 				// this property determines which template is used
 				nodeCategoryProperty: 'gender',
-				// if a node data object is copied, copy its data.a Array
-				// copiesArrays: true,
-				// create all of the nodes for people
-				// nodeDataArray: props.people,
 				// positive keys for nodes
 				makeUniqueKeyFunction: (m: go.Model, data: PersonNode) => {
 					let k = data.key || 1
@@ -204,12 +196,10 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 			)
 		)
 
-		// setupDiagram(myDiagram)
-
 		return myDiagram
-	}
+	}, [])
 
-	/** process the node data to determine marriages */
+	// process the node data to determine marriages
 	const { marriageLabelNodes, marriageLinkNodes } = React.useMemo(() => {
 		const labelNodes: MarriageLabelObject[] = []
 		const linkNodes: MarriageLink[] = []
@@ -234,7 +224,6 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 
 				// add a label node for the marriage link
 				const labelData: MarriageLabelObject = { gender: MARRIAGE_LINK_KEY, key: linkCount.current }
-				// model.addNodeData(marriageLabelData)
 				labelNodes.push(labelData)
 
 				linkCount.current--
@@ -246,9 +235,7 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 					labelKeys: [labelData.key],
 					category: MARRIAGE_LINK_CATEGORY,
 				}
-				// model.addLinkData(marriageLinkData)
 				linkNodes.push(linkData)
-				// setState(prev => ({ ...prev, linkDataArray: [...prev.linkDataArray, marriageLinkData] }))
 			}
 		}
 
@@ -260,49 +247,8 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 		[props.people, marriageLabelNodes]
 	)
 
-	console.log('Nodes', marriageLabelNodes, marriageLinkNodes)
-
-	// /**
-	//  * create and initialize the Diagram.model given an array of node data representing people
-	//  * @param diagram diagram
-	//  * @param focusId focus on this person
-	//  */
-	// const setupDiagram = (diagram: go.Diagram, focusId?: number) => {
-	// 	setupParents(diagram)
-
-	// 	const node = diagram.findNodeForKey(focusId)
-	// 	if (node !== null) {
-	// 		diagram.select(node)
-	// 		// remove any spouse for the person under focus:
-	// 		//node.linksConnected.each(l => {
-	// 		//  if (!l.isLabeledLink) return;
-	// 		//  l.opacity = 0;
-	// 		//  const spouse = l.getOtherNode(node);
-	// 		//  spouse.opacity = 0;
-	// 		//  spouse.pickable = false;
-	// 		//});
-	// 	}
-	// }
-
-	// const findMarriage = (diagram: go.Diagram, a: go.Key, b: go.Key): { data: MarriageLink } | null => {
-	// 	const nodeA = diagram.findNodeForKey(a)
-	// 	const nodeB = diagram.findNodeForKey(b)
-	// 	if (nodeA !== null && nodeB !== null) {
-	// 		const it = nodeA.findLinksBetween(nodeB) // in either direction
-	// 		while (it.next()) {
-	// 			const link = it.value
-	// 			// Check for marriage link
-	// 			if (link.data !== null && link.data.category === MARRIAGE_LINK_CATEGORY) return link
-	// 		}
-	// 	}
-	// 	return null
-	// }
-
-	// /**
-	//  * process parent-child relationships once all marriages are known
-	//  * @param diagram the diagram
-	//  */
-	const parentsLinkNodes = React.useMemo(() => {
+	// process parent-child relationships once all marriages are known
+	const parentChildLinkNodes = React.useMemo(() => {
 		const linkNodes: go.ObjectData[] = []
 
 		for (const data of props.people) {
@@ -334,8 +280,8 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 	}, [props.people])
 
 	const linkDataArray = React.useMemo(
-		() => [...marriageLinkNodes, ...parentsLinkNodes],
-		[marriageLinkNodes, parentsLinkNodes]
+		() => [...marriageLinkNodes, ...parentChildLinkNodes],
+		[marriageLinkNodes, parentChildLinkNodes]
 	)
 
 	return (
