@@ -28,7 +28,18 @@ export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddress
 		return moment(person.birth.datetime)
 	}, [person])
 
-	const birthDate = useMemo(() => (birthMoment ? birthMoment.format('MM/DD/YYYY') : ''), [birthMoment])
+	const birthDate = useMemo(() => {
+		if (!birthMoment) {
+			return ''
+		}
+
+		// Format with time
+		if (person.birth.datetime.indexOf('T') > -1) {
+			return birthMoment.format('MM/DD/YYYY h:mm a')
+		}
+
+		return birthMoment.format('MM/DD/YYYY')
+	}, [birthMoment, person?.birth?.datetime])
 
 	const deathMoment = useMemo(() => {
 		if (!person?.death?.datetime) return null
