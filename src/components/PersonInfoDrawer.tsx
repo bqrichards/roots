@@ -115,6 +115,12 @@ export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddress
 			{person?.pets && <ListItemList title="Pets" dataSource={formattedPets} />}
 			{person?.addresses && <ListItemList title="Addresses" dataSource={formattedAddresses} />}
 			{person?.jobs && <ListItemList title="Jobs" dataSource={formattedJobs} />}
+			{person?.notes && (
+				<>
+					<Typography.Title level={5}>Notes</Typography.Title>
+					<Typography.Paragraph>{person.notes}</Typography.Paragraph>
+				</>
+			)}
 		</Drawer>
 	)
 }

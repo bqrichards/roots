@@ -88,6 +88,9 @@ export interface PersonNode {
 
 	/** partner */
 	partner?: number | number[]
+
+	/** Additional notes */
+	notes?: string
 }
 
 export interface Family {
