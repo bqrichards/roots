@@ -228,12 +228,8 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 					continue
 				}
 
-				// Check if connection is already made in either direction
-				const linkExists = linkNodes.some(
-					linkNode =>
-						(linkNode.from === personKey && linkNode.to === partnerKey) ||
-						(linkNode.from === partnerKey && linkNode.to === personKey)
-				)
+				// Check if connection is already made
+				const linkExists = linkNodes.some(linkNode => linkNode.from === partnerKey && linkNode.to === personKey)
 				if (linkExists) continue
 
 				// add a label node for the marriage link
@@ -315,8 +311,11 @@ export const DiagramWrapper: React.FC<WrapperProps> = props => {
 			const father = data.dad
 			if (mother === undefined || father === undefined) continue
 
+			// Find parents' marriage link for this child
 			const marriageLinkData = marriageLinkNodes.find(
-				marriageLinkNode => marriageLinkNode.from === mother && marriageLinkNode.to === father
+				marriageLinkNode =>
+					(marriageLinkNode.from === mother && marriageLinkNode.to === father) ||
+					(marriageLinkNode.from === father && marriageLinkNode.to === mother)
 			)
 
 			if (!marriageLinkData) {
