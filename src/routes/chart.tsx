@@ -1,4 +1,3 @@
-import { PageHeader } from 'components/PageHeader'
 import { useCallback, useState } from 'react'
 import '../styles/chart.scss'
 import type { Family, PersonNode } from '../types/family.types'
@@ -85,7 +84,6 @@ export default function Chart({ family }: ChartProps) {
 
 	return (
 		<>
-			<PageHeader title="Chart" />
 			<PersonInfoDrawer
 				person={selectedPerson}
 				allAddresses={addresses}

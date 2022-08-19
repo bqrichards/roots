@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { CHART_PATH, HOME_PATH } from './routes'
-import { Menu, Layout, Typography } from 'antd'
+import { Menu, Layout } from 'antd'
 import type { MenuClickEventHandler } from 'rc-menu/lib/interface'
 import { HomeOutlined, NodeExpandOutlined } from '@ant-design/icons'
 
@@ -13,10 +13,10 @@ import { FamilySelect } from './components/FamilySelect'
 import type { Family } from './types/family.types'
 import INITIAL_FAMILY from './initialFamily'
 
-const { Sider, Content } = Layout
+const { Header, Content } = Layout
 
 const MENU_ITEMS = [
-	{ label: 'Home', key: HOME_PATH, icon: <HomeOutlined /> },
+	{ label: 'Home', key: HOME_PATH, icon: <HomeOutlined />, disabled: true },
 	{ label: 'Chart', key: CHART_PATH, icon: <NodeExpandOutlined /> },
 ]
 
@@ -28,8 +28,6 @@ const menuKeyToLabel: Record<string, string> = MENU_ITEMS.reduce((map, obj) => {
 
 const App = () => {
 	const [familyTree, setFamilyTree] = useState<Family | null>(INITIAL_FAMILY)
-	const [collapsed, setCollapsed] = useState(true)
-	const toggleCollapsed = useCallback(() => setCollapsed(prev => !prev), [])
 
 	const makeNewFamilyTree = useCallback(() => setFamilyTree(INITIAL_FAMILY), [])
 
@@ -55,10 +53,8 @@ const App = () => {
 
 	// Setup hotkey for collapsing Sider
 	useEffect(() => {
-		const listener = e => {
-			if (e.key === '[') {
-				toggleCollapsed()
-			} else if (e.key === '1') {
+		const listener = (e: KeyboardEvent) => {
+			if (e.key === '1') {
 				navigate(HOME_PATH)
 			} else if (e.key === '2') {
 				navigate(CHART_PATH)
@@ -74,20 +70,9 @@ const App = () => {
 
 	return (
 		<div className={styles.container}>
-			<Sider className={styles.sider} collapsible collapsed={collapsed} onCollapse={setCollapsed}>
-				<div className={styles.siderMenuContainer}>
-					<Menu
-						mode="inline"
-						className={styles.siderMenu}
-						items={MENU_ITEMS}
-						selectedKeys={[pathname]}
-						onClick={onMenuClickHandler}
-					/>
-					<div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-						<Typography.Text>roots{collapsed ? '' : ' v0.0.1'}</Typography.Text>
-					</div>
-				</div>
-			</Sider>
+			<Header className={styles.header}>
+				<Menu mode="horizontal" items={MENU_ITEMS} selectedKeys={[pathname]} onClick={onMenuClickHandler} />
+			</Header>
 			<Content className={styles.mainContent}>
 				<Routes>
 					<Route path={HOME_PATH} element={<Home />} />
