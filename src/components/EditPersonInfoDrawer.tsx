@@ -1,10 +1,8 @@
 import { FC, useCallback, useEffect, useMemo } from 'react'
 import { Button, Collapse, DatePicker, Drawer, Form, Input, Radio, Typography } from 'antd'
-import type { Address, PersonNode, PersonNodeEditing, Pet } from '../types/family.types'
+import type { Address, PersonNode, Pet } from '../types/family.types'
 import { SaveOutlined } from '@ant-design/icons'
 import { PersonUtil } from 'utils/PersonUtil'
-
-type FormValues = PersonNodeEditing
 
 interface EditPersonInfoDrawerProps {
 	person: PersonNode | null
@@ -13,43 +11,52 @@ interface EditPersonInfoDrawerProps {
 	onClose: () => void
 }
 
-export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, allAddresses, onClose }) => {
-	const [form] = Form.useForm<FormValues>()
+export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, onClose }) => {
+	const [form] = Form.useForm()
+
+	const visible = !!person
+
+	useEffect(() => {
+		if (!visible) {
+			form.resetFields()
+		}
+	}, [form, visible])
 
 	useEffect(() => {
 		// Convert datetime to moment
 		const editingPerson = PersonUtil.convertPersonToEdit(person)
 		form.setFieldsValue(editingPerson)
-	}, [person])
+	}, [form, person])
 
 	const fullName = useMemo(() => {
+		let name = ''
 		if (person?.middleName) {
 			const nameParts = person.name.split(' ')
 			nameParts.splice(1, 0, person.middleName)
-			return nameParts.join(' ')
+			name = nameParts.join(' ')
 		} else {
-			return person?.name || '(unknown)'
+			name = person?.name || '(unknown)'
 		}
+
+		return `Editing ${name}`
 	}, [person])
 
-	const addressOptions = useMemo(
-		() =>
-			allAddresses.map(address => ({
-				value: address.key,
-				label: PersonUtil.formatAddress(address),
-			})),
-		[]
-	)
+	// const addressOptions = useMemo(
+	// 	() =>
+	// 		allAddresses.map(address => ({
+	// 			value: address.key,
+	// 			label: address.line1,
+	// 		})),
+	// 	[]
+	// )
 
-	console.log(addressOptions)
-
-	const onSave = useCallback((values: FormValues) => {
+	const onSave = useCallback((values: PersonNode) => {
 		alert(JSON.stringify(values, undefined, 2))
 	}, [])
 
 	return (
 		<Drawer
-			visible={!!person}
+			visible={visible}
 			title={fullName}
 			onClose={onClose}
 			closable
@@ -60,7 +67,7 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, al
 				</Button>
 			}
 		>
-			<Form<FormValues> form={form} onFinish={onSave}>
+			<Form form={form} onFinish={onSave}>
 				<Form.Item name="key" hidden />
 				<Typography.Text>First Name</Typography.Text>
 				<Form.Item name="name">
@@ -77,7 +84,7 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, al
 						<Radio value="F">Female</Radio>
 					</Radio.Group>
 				</Form.Item>
-				<Collapse defaultActiveKey={['1', '2']}>
+				<Collapse defaultActiveKey={['1']}>
 					<Collapse.Panel key="1" header="Birth">
 						<Typography.Text>Date</Typography.Text>
 						<Form.Item name={['birth', 'datetime']}>
@@ -111,9 +118,9 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, al
 						</Form.Item>
 					</Collapse.Panel>
 				</Collapse>
-				<Typography.Text>TODO - jobs</Typography.Text>
-				<Typography.Text>TODO - addresses</Typography.Text>
-				<Typography.Text>TODO - pets</Typography.Text>
+				<Form.Item name="jobs" hidden />
+				<Form.Item name="addresses" hidden />
+				<Form.Item name="pets" hidden />
 				<Typography.Text>Notes</Typography.Text>
 				<Form.Item name="notes">
 					<Input.TextArea />
@@ -122,29 +129,3 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, al
 		</Drawer>
 	)
 }
-
-// {person?.birth && (
-// 	<>
-// 		<Typography.Title level={5}>Birth</Typography.Title>
-// 		<Descriptions column={1}>
-// 			<Descriptions.Item label="Date">{birthDate}</Descriptions.Item>
-// 			{person?.birth?.place && <Descriptions.Item label="Place">{person.birth.place}</Descriptions.Item>}
-// 			{person?.birth?.weight && <Descriptions.Item label="Weight">{person.birth.weight}</Descriptions.Item>}
-// 			{person?.birth?.address && <Descriptions.Item label="Address">{person.birth.address}</Descriptions.Item>}
-// 			{person?.birth?.doctor && <Descriptions.Item label="Doctor">{person.birth.doctor}</Descriptions.Item>}
-// 		</Descriptions>
-// 	</>
-// )}
-// {person?.death && (
-// 	<>
-// 		<Divider />
-// 		<Typography.Title level={5}>Death</Typography.Title>
-// 		<Descriptions column={1}>
-// 			<Descriptions.Item label="Date">{deathDate}</Descriptions.Item>
-// 			{person?.death?.place && <Descriptions.Item label="Place">{person.death.place}</Descriptions.Item>}
-// 		</Descriptions>
-// 	</>
-// )}
-// {person?.pets && <ListItemList title="Pets" dataSource={formattedPets} />}
-// {person?.addresses && <ListItemList title="Addresses" dataSource={formattedAddresses} />}
-// {person?.jobs && <ListItemList title="Jobs" dataSource={formattedJobs} />}
