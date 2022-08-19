@@ -118,3 +118,13 @@ export interface Family {
 }
 
 export type OnPersonClickedFunction = (person: PersonNode) => void
+
+type PersonNodeBirth = Omit<Required<PersonNode>['birth'], 'datetime'>
+
+interface PersonNodeBirthEditing extends PersonNodeBirth {
+	datetime: moment.Moment
+}
+
+export interface PersonNodeEditing extends Omit<PersonNode, 'birth'> {
+	birth: PersonNodeBirthEditing
+}
