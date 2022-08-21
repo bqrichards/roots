@@ -11,6 +11,7 @@ interface WrapperProps {
 	divId: string
 	family: Family
 	onPersonClicked: OnPersonClickedFunction
+	onPersonEdit: OnPersonClickedFunction
 }
 
 const bluegrad = '#90CAF9'

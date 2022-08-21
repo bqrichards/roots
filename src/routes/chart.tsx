@@ -1,9 +1,9 @@
-import { PageHeader } from 'components/PageHeader'
 import { useCallback, useState } from 'react'
 import '../styles/chart.scss'
 import type { Family, PersonNode } from '../types/family.types'
 import { PersonInfoDrawer } from '../components/PersonInfoDrawer'
 import { DiagramWrapper } from '../components/DiagramWrapper'
+import { EditPersonInfoDrawer } from 'components/EditPersonInfoDrawer'
 
 interface ChartProps {
 	family: Family | null
@@ -11,7 +11,8 @@ interface ChartProps {
 
 export default function Chart({ family }: ChartProps) {
 	const { addresses = [], pets = [] } = family || {}
-	const [selectedPerson, setSelectedPerson] = useState<PersonNode | null>()
+	const [selectedPerson, setSelectedPerson] = useState<PersonNode | null>(null)
+	const [editingPerson, setEditingPerson] = useState<PersonNode | null>(null)
 
 	const onPersonClicked = useCallback((person: PersonNode) => {
 		setSelectedPerson(person)
@@ -19,6 +20,10 @@ export default function Chart({ family }: ChartProps) {
 
 	const onPersonClosed = useCallback(() => {
 		setSelectedPerson(null)
+	}, [])
+
+	const onEditPersonClosed = useCallback(() => {
+		setEditingPerson(null)
 	}, [])
 
 	/**
@@ -79,8 +84,19 @@ export default function Chart({ family }: ChartProps) {
 
 	return (
 		<>
-			<PageHeader title="Chart" />
-			<PersonInfoDrawer person={selectedPerson} allAddresses={addresses} allPets={pets} onClose={onPersonClosed} />
+			<PersonInfoDrawer
+				person={selectedPerson}
+				allAddresses={addresses}
+				allPets={pets}
+				onClose={onPersonClosed}
+				onEdit={setEditingPerson}
+			/>
+			<EditPersonInfoDrawer
+				person={editingPerson}
+				allAddresses={addresses}
+				allPets={pets}
+				onClose={onEditPersonClosed}
+			/>
 			<DiagramWrapper
 				family={family}
 				skipsDiagramUpdate={false}
@@ -88,6 +104,7 @@ export default function Chart({ family }: ChartProps) {
 				onDiagramEvent={handleDiagramEvent}
 				onModelChange={handleModelChange}
 				onPersonClicked={onPersonClicked}
+				onPersonEdit={setEditingPerson}
 			/>
 			<div id={divId} style={{ height: 0, width: 0 }} />
 		</>

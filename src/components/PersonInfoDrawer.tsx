@@ -1,18 +1,20 @@
 import { FC, useMemo } from 'react'
-import { Descriptions, Divider, Drawer, Typography } from 'antd'
+import { Button, Descriptions, Divider, Drawer, Typography } from 'antd'
 import moment, { Moment } from 'moment'
 import type { Address, PersonNode, Pet } from '../types/family.types'
 import { ListItemList } from './ListItemList'
 import type { ListItem } from './ListItemList'
+import { EditOutlined } from '@ant-design/icons'
 
 interface PersonInfoDrawerProps {
 	person: PersonNode | null
 	allAddresses: Address[]
 	allPets: Pet[]
+	onEdit: (person: PersonNode | null) => void
 	onClose: () => void
 }
 
-export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddresses, allPets, onClose }) => {
+export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddresses, allPets, onClose, onEdit }) => {
 	const fullName = useMemo(() => {
 		if (person?.middleName) {
 			const nameParts = person.name.split(' ')
@@ -99,7 +101,18 @@ export const PersonInfoDrawer: FC<PersonInfoDrawerProps> = ({ person, allAddress
 	)
 
 	return (
-		<Drawer visible={!!person} title={fullName} onClose={onClose} closable destroyOnClose>
+		<Drawer
+			visible={!!person}
+			title={fullName}
+			onClose={onClose}
+			closable
+			destroyOnClose
+			extra={
+				<Button icon={<EditOutlined />} onClick={() => onEdit(person)}>
+					Edit
+				</Button>
+			}
+		>
 			<Typography.Paragraph>Age: {age}</Typography.Paragraph>
 			{person?.birth && (
 				<>
