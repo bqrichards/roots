@@ -1,8 +1,9 @@
-import { FC, useCallback, useEffect, useMemo } from 'react'
-import { Button, Collapse, DatePicker, Drawer, Form, Input, Radio, Typography } from 'antd'
+import { FC, useCallback, useEffect, useMemo, useState } from 'react'
+import { Button, Collapse, DatePicker, Drawer, Form, Input, Radio, Table, TableColumnsType, Typography } from 'antd'
 import type { Address, PersonNode, Pet } from '../types/family.types'
 import { SaveOutlined } from '@ant-design/icons'
 import { PersonUtil } from 'utils/PersonUtil'
+import type { TablePaginationConfig, TableRowSelection } from 'antd/lib/table/interface'
 
 interface EditPersonInfoDrawerProps {
 	person: PersonNode | null
@@ -11,8 +12,11 @@ interface EditPersonInfoDrawerProps {
 	onClose: () => void
 }
 
-export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, onClose }) => {
+export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, allAddresses, onClose }) => {
 	const [form] = Form.useForm()
+	const [, setRerender] = useState(false)
+	const rerender = useCallback(() => setRerender(prev => !prev), [])
+	const selectedAddresses = form.getFieldValue('addresses')
 
 	const visible = !!person
 
@@ -26,6 +30,7 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, on
 		// Convert datetime to moment
 		const editingPerson = PersonUtil.convertPersonToEdit(person)
 		form.setFieldsValue(editingPerson)
+		rerender()
 	}, [form, person])
 
 	const fullName = useMemo(() => {
@@ -41,18 +46,23 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, on
 		return `Editing ${name}`
 	}, [person])
 
-	// const addressOptions = useMemo(
-	// 	() =>
-	// 		allAddresses.map(address => ({
-	// 			value: address.key,
-	// 			label: address.line1,
-	// 		})),
-	// 	[]
-	// )
-
 	const onSave = useCallback((values: PersonNode) => {
+		// TODO
 		alert(JSON.stringify(values, undefined, 2))
 	}, [])
+
+	const addressSelection = useMemo<TableRowSelection<Address>>(
+		() => ({
+			selectedRowKeys: selectedAddresses,
+			onChange: newSelectedRows => {
+				form.setFieldsValue({
+					addresses: newSelectedRows,
+				})
+				rerender()
+			},
+		}),
+		[form, selectedAddresses, rerender]
+	)
 
 	return (
 		<Drawer
@@ -61,6 +71,7 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, on
 			onClose={onClose}
 			closable
 			destroyOnClose
+			width={600}
 			extra={
 				<Button icon={<SaveOutlined />} onClick={form.submit}>
 					Save
@@ -84,7 +95,7 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, on
 						<Radio value="F">Female</Radio>
 					</Radio.Group>
 				</Form.Item>
-				<Collapse defaultActiveKey={['1']}>
+				<Collapse defaultActiveKey={['1']} style={{ marginBottom: 16 }}>
 					<Collapse.Panel key="1" header="Birth">
 						<Typography.Text>Date</Typography.Text>
 						<Form.Item name={['birth', 'datetime']}>
@@ -119,7 +130,15 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, on
 					</Collapse.Panel>
 				</Collapse>
 				<Form.Item name="jobs" hidden />
+				<Typography.Text>Addresses</Typography.Text>
 				<Form.Item name="addresses" hidden />
+				<Table
+					dataSource={allAddresses}
+					columns={addressColumns}
+					rowSelection={addressSelection}
+					pagination={pageTableConfig}
+					showHeader={false}
+				/>
 				<Form.Item name="pets" hidden />
 				<Typography.Text>Notes</Typography.Text>
 				<Form.Item name="notes">
@@ -128,4 +147,15 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, on
 			</Form>
 		</Drawer>
 	)
+}
+
+const addressColumns: TableColumnsType<Address> = [
+	{
+		title: 'Address',
+		render: (_value, record) => PersonUtil.formatAddress(record),
+	},
+]
+
+const pageTableConfig: TablePaginationConfig = {
+	pageSize: 5,
 }

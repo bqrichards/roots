@@ -23,13 +23,20 @@ export class PersonUtil {
 	}
 
 	public static formatAddress(address: Address): string {
-		let str = `${address.line1}`
+		let str = ''
+		if (address.line1) {
+			str += `${address.line1}`
+		}
+
 		if (address.line2) {
 			str += ` ${address.line2}`
 		}
 
 		if (address.city) {
-			str += ` ${address.city},`
+			str += ` ${address.city}`
+			if (address.state || address.zip || address.country) {
+				str += ','
+			}
 		}
 
 		if (address.state) {
