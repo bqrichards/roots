@@ -1,6 +1,18 @@
 import { FC, useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Collapse, DatePicker, Drawer, Form, Input, Radio, Table, TableColumnsType, Typography } from 'antd'
-import type { Address, PersonNode, Pet } from '../types/family.types'
+import {
+	Button,
+	Card,
+	Collapse,
+	DatePicker,
+	Drawer,
+	Form,
+	Input,
+	Radio,
+	Table,
+	TableColumnsType,
+	Typography,
+} from 'antd'
+import type { Address, Job, PersonNode, Pet } from '../types/family.types'
 import { SaveOutlined } from '@ant-design/icons'
 import { PersonUtil } from 'utils/PersonUtil'
 import type { TablePaginationConfig, TableRowSelection } from 'antd/lib/table/interface'
@@ -78,6 +90,38 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, al
 		[form, selectedPets, rerender]
 	)
 
+	const jobsColumns = useMemo<TableColumnsType<Job>>(
+		() => [
+			{
+				title: 'Position',
+				dataIndex: 'position',
+			},
+			{
+				title: 'Company',
+				dataIndex: 'company',
+			},
+			{
+				title: 'Place',
+				dataIndex: 'place',
+				render: place => {
+					const address = allAddresses.find(address => address.key === place)
+					if (!address) return 'Error'
+
+					return PersonUtil.formatAddress(address)
+				},
+			},
+			{
+				title: 'Start',
+				dataIndex: 'startYear',
+			},
+			{
+				title: 'End',
+				dataIndex: 'endYear',
+			},
+		],
+		[allAddresses]
+	)
+
 	return (
 		<Drawer
 			visible={visible}
@@ -143,29 +187,35 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, al
 						</Form.Item>
 					</Collapse.Panel>
 				</Collapse>
-				<Form.Item name="jobs" hidden />
-				<Typography.Text>Addresses</Typography.Text>
-				<Form.Item name="addresses" hidden />
-				<Table
-					dataSource={allAddresses}
-					columns={addressColumns}
-					rowSelection={addressSelection}
-					pagination={pageTableConfig}
-					showHeader={false}
-				/>
-				<Typography.Text>Pets</Typography.Text>
+				<Card title="Jobs" bodyStyle={{ padding: 0 }}>
+					<Table dataSource={person?.jobs} columns={jobsColumns} pagination={pageTableConfig} />
+				</Card>
+				<Card title="Addresses" bodyStyle={{ padding: 0 }}>
+					<Table
+						dataSource={allAddresses}
+						columns={addressColumns}
+						rowSelection={addressSelection}
+						pagination={pageTableConfig}
+						showHeader={false}
+					/>
+				</Card>
+				<Card title="Pets" bodyStyle={{ padding: 0 }}>
+					<Table
+						dataSource={allPets}
+						columns={petsColumns}
+						rowSelection={petSelection}
+						pagination={pageTableConfig}
+						showHeader={false}
+					/>
+				</Card>
 				<Form.Item name="pets" hidden />
-				<Table
-					dataSource={allPets}
-					columns={petsColumns}
-					rowSelection={petSelection}
-					pagination={pageTableConfig}
-					showHeader={false}
-				/>
-				<Typography.Text>Notes</Typography.Text>
-				<Form.Item name="notes">
-					<Input.TextArea />
-				</Form.Item>
+				<Form.Item name="jobs" hidden />
+				<Form.Item name="addresses" hidden />
+				<Card title="Notes">
+					<Form.Item name="notes">
+						<Input.TextArea />
+					</Form.Item>
+				</Card>
 			</Form>
 		</Drawer>
 	)

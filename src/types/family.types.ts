@@ -29,8 +29,8 @@ export interface Address {
 }
 
 export interface Job {
-	/** Address of job */
-	place?: Address
+	/** Address key of job */
+	place?: number
 
 	/** Company name */
 	company?: string
