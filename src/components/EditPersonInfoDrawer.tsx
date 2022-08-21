@@ -12,11 +12,12 @@ interface EditPersonInfoDrawerProps {
 	onClose: () => void
 }
 
-export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, allAddresses, onClose }) => {
+export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, allAddresses, allPets, onClose }) => {
 	const [form] = Form.useForm()
 	const [, setRerender] = useState(false)
 	const rerender = useCallback(() => setRerender(prev => !prev), [])
 	const selectedAddresses = form.getFieldValue('addresses')
+	const selectedPets = form.getFieldValue('pets')
 
 	const visible = !!person
 
@@ -30,7 +31,7 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, al
 		// Convert datetime to moment
 		const editingPerson = PersonUtil.convertPersonToEdit(person)
 		form.setFieldsValue(editingPerson)
-		rerender()
+		rerender() // for table selections
 	}, [form, person])
 
 	const fullName = useMemo(() => {
@@ -62,6 +63,19 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, al
 			},
 		}),
 		[form, selectedAddresses, rerender]
+	)
+
+	const petSelection = useMemo<TableRowSelection<Pet>>(
+		() => ({
+			selectedRowKeys: selectedPets,
+			onChange: newSelectedRows => {
+				form.setFieldsValue({
+					pets: newSelectedRows,
+				})
+				rerender()
+			},
+		}),
+		[form, selectedPets, rerender]
 	)
 
 	return (
@@ -139,7 +153,15 @@ export const EditPersonInfoDrawer: FC<EditPersonInfoDrawerProps> = ({ person, al
 					pagination={pageTableConfig}
 					showHeader={false}
 				/>
+				<Typography.Text>Pets</Typography.Text>
 				<Form.Item name="pets" hidden />
+				<Table
+					dataSource={allPets}
+					columns={petsColumns}
+					rowSelection={petSelection}
+					pagination={pageTableConfig}
+					showHeader={false}
+				/>
 				<Typography.Text>Notes</Typography.Text>
 				<Form.Item name="notes">
 					<Input.TextArea />
@@ -153,6 +175,21 @@ const addressColumns: TableColumnsType<Address> = [
 	{
 		title: 'Address',
 		render: (_value, record) => PersonUtil.formatAddress(record),
+	},
+]
+
+const petsColumns: TableColumnsType<Pet> = [
+	{
+		title: 'Pet',
+		render: (_value, pet) => (
+			<>
+				<Typography.Text>{pet.name}</Typography.Text>
+				<br />
+				<Typography.Text style={{ color: 'gray' }}>
+					{[pet.animal, pet.breed, pet.sex].filter(val => typeof val === 'string').join(', ')}
+				</Typography.Text>
+			</>
+		),
 	},
 ]
 
